@@ -1,0 +1,164 @@
+<header class="mk-header">
+  <div class="inner">
+    <a class="mk-brand" href="#map"><img src="__LOGO_COLOR__" alt="C-HAWQ logo"><span class="wm">C-HAWQ</span><span class="sub">Canal Water Quality Explorer</span></a>
+    <nav class="mk-nav" aria-label="Pages">
+      <a href="#map" data-page="map">Map</a>
+      <a href="#findings" data-page="findings">Findings</a>
+      <a href="#types" data-page="types">Canal types</a>
+      <a href="#network" data-page="network">Network complexity</a>
+      <a href="#data" data-page="data">Data</a>
+      <a href="#methods" data-page="methods">Methods</a>
+    </nav>
+    <a class="mk-cta" href="#data">Download data</a>
+  </div>
+</header>
+
+<section class="hero" id="hero">
+  <div class="inner">
+    <div>
+      <span class="eyebrow">Statewide residential canal study · 2015–2026 monitoring</span>
+      <h1>Florida's residential canals hold less oxygen than the water right outside them</h1>
+      <p class="lead" id="hero-lead">C-HAWQ matched public water quality monitoring to every mapped residential canal in Florida to see whether canal design shapes water quality. Explore the map, select an area to download, or pick stations to compare.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num" id="s1">—</div><div class="lbl">mg/L median oxygen gap, canal minus adjacent open water</div></div>
+      <div class="stat"><div class="num" id="s2">—</div><div class="lbl">of paired canals read lower in oxygen</div></div>
+      <div class="stat"><div class="num" id="s3">—</div><div class="lbl">monitoring stations inside canals</div></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="filters" id="filters">
+    <label class="f">Measure<select id="f-param"></select></label>
+    <label class="f">Setting<select id="f-setting"><option value="all">Canals and open water</option><option value="Canal">Canals only</option><option value="Open water">Open water only</option></select></label>
+    <label class="f">Water management district<select id="f-wmd"></select></label>
+    <label class="f">County<select id="f-county"></select></label>
+    <label class="f">Canal form<select id="f-form"></select></label>
+    <button class="btn" id="f-reset">Reset filters</button>
+    <span class="status" id="f-status"></span>
+  </div>
+
+  <!-- MAP (home) -->
+  <section class="page" id="page-map">
+    <div class="maprow">
+      <div>
+        <div class="mapbox" id="mapbox">
+          <div class="mapctl"><button class="btn" id="z-in" aria-label="Zoom in">+</button><button class="btn" id="z-out" aria-label="Zoom out">−</button><button class="btn" id="z-fit" aria-label="Zoom to filtered stations" title="Zoom to filtered stations">⤢</button></div>
+          <div class="tools" role="group" aria-label="Map tools">
+            <button class="btn" data-tool="pan" aria-pressed="true">Pan</button>
+            <button class="btn" data-tool="rect" aria-pressed="false">Rectangle</button>
+            <button class="btn" data-tool="lasso" aria-pressed="false">Lasso</button>
+          </div>
+          <canvas id="mapcv" aria-label="Map of Florida residential canals and monitoring stations"></canvas>
+          <div class="maphint" id="maphint">Scroll to zoom, drag to pan. Click a station for details.</div>
+          <div class="tt" id="map-tt"></div>
+        </div>
+        <div class="legend" id="map-legend"></div>
+      </div>
+      <div class="side">
+        <div class="card" id="sel-card">
+          <h3>Select an area to download</h3>
+          <p class="note" id="sel-note">Choose Rectangle or Lasso, then drag on the map. Everything inside that matches your filters is selected.</p>
+          <div id="sel-body" hidden>
+            <dl class="kv" id="sel-counts"></dl>
+            <div class="checks">
+              <label><input type="checkbox" id="c-poly" checked> Canal polygons (GeoJSON)</label>
+              <label><input type="checkbox" id="c-cl"> Canal centerlines (GeoJSON)</label>
+              <label><input type="checkbox" id="c-st" checked> Stations with canal attributes (CSV)</label>
+              <label><input type="checkbox" id="c-smp"> Every sample at those stations (CSV)</label>
+            </div>
+            <div class="row"><button class="btn primary" id="sel-dl">Download selection</button><button class="btn" id="sel-cmp">Compare these stations</button><button class="btn" id="sel-clear">Clear</button></div>
+            <p class="status" id="sel-status"></p>
+          </div>
+        </div>
+        <div class="card" id="detail">
+          <h3 id="d-title">Station details</h3>
+          <p class="note" id="d-sub">Click any dot on the map.</p>
+          <div id="d-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-h"><h2 id="cmp-h">Compare stations</h2><div class="row"><button class="btn" id="cmp-clear">Clear comparison</button></div></div>
+    <div class="chips" id="cmp-chips"></div>
+    <div id="cmp-empty" class="empty">Click a station and choose <b>Add to comparison</b>, or draw an area and choose <b>Compare these stations</b>. Up to 10 stations.</div>
+    <div class="grid2" id="cmp-grid" hidden>
+      <div class="card"><h3 id="cmp-bar-t">Station medians</h3><p class="note">Median of each station's samples since 2015. Dashed lines mark the statewide canal and open-water medians.</p><div class="chart" id="ch-cmp-bar"></div></div>
+      <div class="card"><h3 id="cmp-ts-t">Every sample over time</h3><p class="note">Each dot is one sample; lines connect a station's samples in date order.</p><div class="chart" id="ch-cmp-ts"></div></div>
+    </div>
+  </section>
+
+  <!-- FINDINGS -->
+  <section class="page" id="page-findings" hidden>
+    <p class="lead" id="takeaway">—</p>
+    <div class="grid2">
+      <div class="card"><h3 id="pairs-title">Each canal against the open water beside it</h3><p class="note" id="pairs-note">—</p><div class="chart" id="ch-pairs"></div></div>
+      <div class="card"><h3 id="annual-title">Year by year</h3><p class="note">Median of all samples each year, canals versus open water within 500 m. District, county and form filters don't apply here.</p><div class="chart" id="ch-annual"></div></div>
+    </div>
+    <div class="card"><h3>Canals versus adjacent open water, every measure</h3>
+      <p class="note">Station medians, stations with 3 or more samples. The paired test compares each canal with the open water beside it, which controls for region and receiving water. A p-value below 0.05 means the difference is unlikely to be chance.</p>
+      <div class="scrollx"><table id="t-cvo"><thead><tr><th>Measure</th><th class="n">Canal median</th><th class="n">Open-water median</th><th class="n">Paired canals</th><th class="n">Paired difference</th><th class="n">% canals worse</th><th class="n">Paired p-value</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <!-- TYPES -->
+  <section class="page" id="page-types" hidden>
+    <div class="filters" style="border:0;padding-top:0"><label class="f">Group canals by<select id="f-factor">
+      <option value="TYP_FORM">Canal form</option><option value="TYP_CONNEC">Connectivity</option><option value="TYP_SCALE">Size class</option><option value="mouth_class">Number of mouths</option><option value="TYP_RECWAT">Receiving water</option><option value="WMDNAME">Water management district</option></select></label></div>
+    <div class="card"><h3 id="type-title">—</h3><p class="note" id="type-kw">—</p><div class="chart" id="ch-type"></div>
+      <p class="note">Each dot is one canal station (median of its samples, 3 or more samples). Boxes show the middle half of stations; the dark line is the median. Canal stations only.</p></div>
+  </section>
+
+  <!-- NETWORK -->
+  <section class="page" id="page-network" hidden>
+    <div class="filters" style="border:0;padding-top:0"><label class="f">Complexity measure<select id="f-metric">
+      <option value="n_junctions">Junctions in the canal network</option><option value="net_len_km">Navigable network length (km)</option><option value="km_per_mouth">Network km per mouth</option><option value="area_acres">Canal polygon area (acres)</option></select></label></div>
+    <div class="grid2">
+      <div class="card"><h3 id="net-title">—</h3><p class="note" id="net-rho">—</p><div class="chart" id="ch-net"></div></div>
+      <div class="card"><h3>Effect of canal form, holding salinity, network size and district constant</h3><p class="note" id="reg-note">—</p><div class="chart" id="ch-reg"></div></div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section class="page" id="page-data" hidden>
+    <div class="card">
+      <div class="row" style="margin-bottom:12px"><label class="f">Search<input type="search" id="t-q" placeholder="Station, name, county, waterbody"></label></div>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn primary" id="dl-st">Filtered stations (CSV)</button>
+        <button class="btn" id="dl-smp">Samples at filtered stations (CSV)</button>
+        <button class="btn" id="dl-cn">Canal polygons for current filters (GeoJSON)</button>
+        <button class="btn" id="dl-stats">Statistics tables (ZIP)</button>
+      </div>
+      <p class="status" id="dl-status"></p>
+      <p class="note" id="t-note">—</p>
+      <div class="tbox"><table id="t-st"><thead><tr></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- METHODS -->
+  <section class="page prose" id="page-methods" hidden>
+    <h2>How this was built</h2>
+    <h3>What it combines</h3>
+    <p>C-HAWQ's statewide residential canal inventory (canal polygons with county, size, form, connectivity, receiving water and number of mouths, plus navigable centerlines) joined to public water quality monitoring from the national Water Quality Portal. The portal carries Florida Department of Environmental Protection monitoring, county and city programs, Florida LAKEWATCH, the U.S. Geological Survey and others.</p>
+    <h3>How stations were assigned</h3>
+    <p>A station counts as a canal station when its coordinates fall inside a canal polygon, and it takes on that canal's attributes. Stations outside every polygon but within 500 m of one form the open-water comparison set, each matched to its nearest canal. Results run from January 2015 to October 2026. Units were standardized, rejected results dropped, and physically impossible values removed. Each station is summarized by its median, and the statistics use stations with at least 3 samples of a measure.</p>
+    <h3>Network measures</h3>
+    <p>Centerlines (the navigable middle of each canal) were joined end to end into connected networks. Each canal gets the total navigable length of its network, the number of junctions (where three or more channels meet), the number of dead-end tips, and kilometers of canal per mouth.</p>
+    <h3>Statistics</h3>
+    <p>Paired Wilcoxon signed-rank tests compare each canal with the open water beside it. Kruskal–Wallis tests compare canal types. Spearman rank correlations relate water quality to network measures. Regressions model each measure on canal form, network length, salinity and water management district, with standard errors grouped by canal network so connected canals aren't counted as independent. Nutrients, chlorophyll and bacteria are modeled on a log scale.</p>
+    <h3>Limits</h3>
+    <p>Monitoring programs choose where and when to sample, so stations aren't a random draw of canals, and Pinellas, Lee and Palm Beach counties contribute the most. Dissolved oxygen swings through the day and with depth; these results don't separate morning from afternoon or bottom from surface. Distance to mouth isn't included yet: the inventory records how many mouths each canal has but not where they are. Once mouth points exist, each station's along-channel distance to its nearest mouth can be added. Map and download geometry is simplified to about 5 m.</p>
+    <h3>Reference values</h3>
+    <p>Dissolved oxygen: 5 mg/L or more is healthy for fish, 2 to 5 stresses sensitive species, below 2 is dangerous (UF/IFAS Extension). Florida's marine standard is written as oxygen saturation (Rule 62-302.533, F.A.C.).</p>
+  </section>
+</main>
+
+<footer class="mk-footer">
+  <div class="inner">
+    <div><div class="brand"><img src="__LOGO_WHITE__" alt="C-HAWQ logo"><span>C-HAWQ</span></div>
+      <p>Coastal Habitat and Water Quality Initiative. Field science for Florida's coastal communities.</p></div>
+    <div><p>Water quality data: <a href="https://www.waterqualitydata.us/" target="_blank" rel="noopener">Water Quality Portal</a> (EPA, USGS, National Water Quality Monitoring Council), downloaded October 16, 2026.</p>
+      <p>Canal inventory: C-HAWQ residential canal polygons and centerlines, October 13, 2026.</p></div>
+  </div>
+  <div class="legal">Prepared for the C-HAWQ Canal Synthesis Paper. Exploratory results; see Methods for limits.</div>
+</footer>
